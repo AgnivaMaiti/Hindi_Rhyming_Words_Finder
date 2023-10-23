@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <title>Hindi Rhyming Words</title>
+    <style>
+        body {
+            background-color: #f2f2f2;
+            color: #4b0082;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        #header {
+            background-color: #4b0082;
+            color: #ffffff;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        #searchContainer {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        #searchWord, #matchChars, #searchButton, #translateButton {
+            width: calc(100% - 20px);
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #4b0082;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4b0082;
+            color: #ffffff;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #6a5acd;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            text-align: center;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        #footer {
+            text-align: center;
+            background-color: #4b0082;
+            color: #ffffff;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <h1>Hindi Rhyming Words</h1>
+    </div>
+    <div id="searchContainer">
+        <label for="searchWord">Enter a Hindi Word:</label>
+        <input type="text" id="searchWord" placeholder="Type here...">
+
+        <label for="matchChars">Number of Matching Characters from the End:</label>
+        <input type="number" id="matchChars" value="2">
+
+        <button id="searchButton">Search</button>
+
+        <button id="translateButton">हिन्दी</button>
+
+        <h2 id="rhymingWordsHeader">Rhyming Words:</h2>
+        <ul id="rhymingWords"></ul>
+    </div>
+
+    <div id="footer">
+        &copy; 2023 Agniva Maiti. Data Source: <a href="https://raw.githubusercontent.com/Shreeshrii/hindi-hunspell/master/Hindi/hi_IN.txt" style="color: #ffffff;">Shreeshrii</a>
+    </div>
+
+    <script>
+        function fetchHindiWords() {
+            fetch('https://raw.githubusercontent.com/Shreeshrii/hindi-hunspell/master/Hindi/hi_IN.txt')
+                .then(response => response.text())
+                .then(data => {
+                    const wordList = data.split('\n').map(word => word.trim());
+                    const searchButton = document.getElementById('searchButton');
+                    const searchWordInput = document.getElementById('searchWord');
+                    const matchCharsInput = document.getElementById('matchChars');
+                    const rhymingWordsList = document.getElementById('rhymingWords');
+                    const rhymingWordsHeader = document.getElementById('rhymingWordsHeader');
+                    const translateButton = document.getElementById('translateButton');
+
+                    searchButton.addEventListener('click', () => {
+                        const searchWord = searchWordInput.value;
+                        const matchChars = parseInt(matchCharsInput.value);
+                        const rhymingWords = findRhymingWords(searchWord, wordList, matchChars);
+                        displayRhymingWords(rhymingWords, rhymingWordsList);
+                    });
+
+                    translateButton.addEventListener('click', function() {
+                        const buttonText = translateButton.textContent;
+                        if (buttonText === 'हिन्दी') {
+                            translateToHindi();
+                        } else {
+                            translateToEnglish();
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                });
+        }
+
+        function findRhymingWords(targetWord, wordList, matchChars) {
+            const targetEnd = targetWord.slice(-matchChars);
+            return wordList.filter(word => word !== targetWord && word.endsWith(targetEnd));
+        }
+
+        function displayRhymingWords(rhymingWords, rhymingWordsList) {
+            rhymingWordsList.innerHTML = '';
+            if (rhymingWords.length === 0) {
+                rhymingWordsList.innerHTML = '<li>No rhyming words found.</li>';
+            } else {
+                rhymingWords.forEach(word => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = word;
+                    rhymingWordsList.appendChild(listItem);
+                });
+            }
+        }
+
+        function translateToHindi() {
+            document.getElementById('header').textContent = 'हिन्दी मित्राक्षर शब्द';
+            document.querySelector('label[for="searchWord"]').textContent = 'एक हिन्दी शब्द लिखें:';
+            document.getElementById('searchWord').setAttribute('placeholder', 'लिखें...');
+            document.querySelector('label[for="matchChars"]').textContent = 'अंत से मेल खाने वाले अक्षरों की संख्या:';
+            document.getElementById('searchButton').textContent = 'खोजें';
+            document.getElementById('rhymingWordsHeader').textContent = 'मित्राक्षर शब्द:';
+            document.getElementById('translateButton').textContent = 'English';
+            document.getElementById('translateButton').onclick = translateToEnglish;
+        }
+
+        function translateToEnglish() {
+            document.getElementById('header').textContent = 'Hindi Rhyming Words';
+            document.querySelector('label[for="searchWord"]').textContent = 'Enter a Hindi Word:';
+            document.getElementById('searchWord').setAttribute('placeholder', 'Type here...');
+            document.querySelector('label[for="matchChars"]').textContent = 'Number of Matching Characters from the End:';
+            document.getElementById('searchButton').textContent = 'Search';
+            document.getElementById('rhymingWordsHeader').textContent = 'Rhyming Words:';
+            document.getElementById('translateButton').textContent = 'हिन्दी';
+            document.getElementById('translateButton').onclick = translateToHindi;
+        }
+
+        fetchHindiWords();
+    </script>
+</body>
+</html>
